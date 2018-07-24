@@ -31,21 +31,20 @@ public class AdminBizImpl implements AdminBiz {
     private static Logger logger = LoggerFactory.getLogger(AdminBizImpl.class);
 
     @Resource
-    public XxlJobLogDao xxlJobLogDao;
+    public  XxlJobLogDao      xxlJobLogDao;
     @Resource
-    private XxlJobInfoDao xxlJobInfoDao;
+    private XxlJobInfoDao     xxlJobInfoDao;
     @Resource
     private XxlJobRegistryDao xxlJobRegistryDao;
     @Resource
-    private XxlJobService xxlJobService;
-
+    private XxlJobService     xxlJobService;
 
     @Override
     public ReturnT<String> callback(List<HandleCallbackParam> callbackParamList) {
-        for (HandleCallbackParam handleCallbackParam: callbackParamList) {
+        for (HandleCallbackParam handleCallbackParam : callbackParamList) {
             ReturnT<String> callbackResult = callback(handleCallbackParam);
             logger.info(">>>>>>>>> JobApiController.callback {}, handleCallbackParam={}, callbackResult={}",
-                    (callbackResult.getCode()==IJobHandler.SUCCESS.getCode()?"success":"fail"), handleCallbackParam, callbackResult);
+                    (callbackResult.getCode() == IJobHandler.SUCCESS.getCode() ? "success" : "fail"), handleCallbackParam, callbackResult);
         }
 
         return ReturnT.SUCCESS;
@@ -65,25 +64,28 @@ public class AdminBizImpl implements AdminBiz {
         String callbackMsg = null;
         if (IJobHandler.SUCCESS.getCode() == handleCallbackParam.getExecuteResult().getCode()) {
             XxlJobInfo xxlJobInfo = xxlJobInfoDao.loadById(log.getJobId());
-            if (xxlJobInfo!=null && StringUtils.isNotBlank(xxlJobInfo.getChildJobId())) {
-                callbackMsg = "<br><br><span style=\"color:#00c0ef;\" > >>>>>>>>>>>"+ I18nUtil.getString("jobconf_trigger_child_run") +"<<<<<<<<<<< </span><br>";
+            if (xxlJobInfo != null && StringUtils.isNotBlank(xxlJobInfo.getChildJobId())) {
+                callbackMsg = "<br><br><span style=\"color:#00c0ef;\" > >>>>>>>>>>>" + I18nUtil.getString("jobconf_trigger_child_run")
+                        + "<<<<<<<<<<< </span><br>";
 
                 String[] childJobIds = xxlJobInfo.getChildJobId().split(",");
                 for (int i = 0; i < childJobIds.length; i++) {
-                    int childJobId = (StringUtils.isNotBlank(childJobIds[i]) && StringUtils.isNumeric(childJobIds[i]))?Integer.valueOf(childJobIds[i]):-1;
+                    int childJobId = (StringUtils.isNotBlank(childJobIds[i]) && StringUtils.isNumeric(childJobIds[i])) ? Integer.valueOf(
+                            childJobIds[i]) : -1;
                     if (childJobId > 0) {
                         ReturnT<String> triggerChildResult = xxlJobService.triggerJob(childJobId);
 
                         // add msg
                         callbackMsg += MessageFormat.format(I18nUtil.getString("jobconf_callback_child_msg1"),
-                                (i+1),
+                                (i + 1),
                                 childJobIds.length,
                                 childJobIds[i],
-                                (triggerChildResult.getCode()==ReturnT.SUCCESS_CODE?I18nUtil.getString("system_success"):I18nUtil.getString("system_fail")),
+                                (triggerChildResult.getCode() == ReturnT.SUCCESS_CODE ? I18nUtil.getString("system_success")
+                                        : I18nUtil.getString("system_fail")),
                                 triggerChildResult.getMsg());
                     } else {
                         callbackMsg += MessageFormat.format(I18nUtil.getString("jobconf_callback_child_msg2"),
-                                (i+1),
+                                (i + 1),
                                 childJobIds.length,
                                 childJobIds[i]);
                     }
@@ -100,18 +102,20 @@ public class AdminBizImpl implements AdminBiz {
                     ifHandleRetry = true;
                 }
             }
-            if (ifHandleRetry){
+            if (ifHandleRetry) {
                 ReturnT<String> retryTriggerResult = xxlJobService.triggerJob(log.getJobId());
-                callbackMsg = "<br><br><span style=\"color:#F39C12;\" > >>>>>>>>>>>"+ I18nUtil.getString("jobconf_fail_handle_retry") +"<<<<<<<<<<< </span><br>";
+                callbackMsg = "<br><br><span style=\"color:#F39C12;\" > >>>>>>>>>>>" + I18nUtil.getString("jobconf_fail_handle_retry")
+                        + "<<<<<<<<<<< </span><br>";
 
                 callbackMsg += MessageFormat.format(I18nUtil.getString("jobconf_callback_msg1"),
-                        (retryTriggerResult.getCode()==ReturnT.SUCCESS_CODE?I18nUtil.getString("system_success"):I18nUtil.getString("system_fail")), retryTriggerResult.getMsg());
+                        (retryTriggerResult.getCode() == ReturnT.SUCCESS_CODE ? I18nUtil.getString("system_success")
+                                : I18nUtil.getString("system_fail")), retryTriggerResult.getMsg());
             }
         }
 
         // handle msg
         StringBuffer handleMsg = new StringBuffer();
-        if (log.getHandleMsg()!=null) {
+        if (log.getHandleMsg() != null) {
             handleMsg.append(log.getHandleMsg()).append("<br>");
         }
         if (handleCallbackParam.getExecuteResult().getMsg() != null) {
@@ -132,9 +136,11 @@ public class AdminBizImpl implements AdminBiz {
 
     @Override
     public ReturnT<String> registry(RegistryParam registryParam) {
-        int ret = xxlJobRegistryDao.registryUpdate(registryParam.getRegistGroup(), registryParam.getRegistryKey(), registryParam.getRegistryValue());
+        int ret = xxlJobRegistryDao.registryUpdate(registryParam.getRegistGroup(), registryParam.getRegistryKey(),
+                registryParam.getRegistryValue());
         if (ret < 1) {
-            xxlJobRegistryDao.registrySave(registryParam.getRegistGroup(), registryParam.getRegistryKey(), registryParam.getRegistryValue());
+            xxlJobRegistryDao.registrySave(registryParam.getRegistGroup(), registryParam.getRegistryKey(),
+                    registryParam.getRegistryValue());
         }
         return ReturnT.SUCCESS;
     }

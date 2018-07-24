@@ -11,12 +11,12 @@ public enum GlueTypeEnum {
     GLUE_PYTHON("GLUE(Python)", true, "python", ".py"),
     GLUE_NODEJS("GLUE(Nodejs)", true, "node", ".js");
 
-    private String desc;
+    private String  desc;
     private boolean isScript;
-    private String cmd;
-    private String suffix;
+    private String  cmd;
+    private String  suffix;
 
-    private GlueTypeEnum(String desc, boolean isScript, String cmd, String suffix) {
+    GlueTypeEnum(String desc, boolean isScript, String cmd, String suffix) {
         this.desc = desc;
         this.isScript = isScript;
         this.cmd = cmd;
@@ -39,8 +39,8 @@ public enum GlueTypeEnum {
         return suffix;
     }
 
-    public static GlueTypeEnum match(String name){
-        for (GlueTypeEnum item: GlueTypeEnum.values()) {
+    public static GlueTypeEnum match(String name) {
+        for (GlueTypeEnum item : GlueTypeEnum.values()) {
             if (item.name().equals(name)) {
                 return item;
             }
